@@ -18,6 +18,9 @@ public:
     double getKpd() const {}
     int getID() const {}
 
-    void setKpd(int Fix) {}
+    void setName(string name) {}
+    void setRoom(int room) {}
+    void setWork(int work) {}
+    void setKpd(int Kpd) {}
     void printKS() {}
 };

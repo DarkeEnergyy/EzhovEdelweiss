@@ -1,4 +1,5 @@
 #include "KS.h"
+#include "Proverka.h"
 #include <string>
 #include <iostream>
 using namespace std;
@@ -13,10 +14,20 @@ int KS::getWork() const { return work; }
 double KS::getKpd() const { return kpd; }
 int KS::getID() const { return id; }
 
-void KS::setKpd(int Kpd) {
-	kpd = Kpd;
+void KS::setName(string name) {
+	this->name = name;
+}
+void KS::setRoom(int room) {
+	this->room = room;
+}
+void KS::setWork(int work) {
+	this->work = work;
+}
+void KS::setKpd(int kpd) {
+	this->kpd = kpd;
 }
 
 void KS::printKS() {
 	cout << "KS:\nId: " << id << "\nName: " << name << "\nRoom: " << room << "\nDiam: " << work << "\nFix: " << kpd << endl;;
 }
+

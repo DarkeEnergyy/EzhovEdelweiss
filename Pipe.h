@@ -18,6 +18,9 @@ public:
     int getFix() const {}
     int getID() const {}
 
+    void setName(string name) {}
+    void setLen(double len) {}
+    void setDiam(double diam) {}
     void setFix(int Fix) {}
     void printPipe() {}
 };
