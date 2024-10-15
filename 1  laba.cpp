@@ -2,21 +2,11 @@
 #include <string>
 #include <fstream>
 #include <typeinfo>
+#include "Pipe.h"
+#include "KS.h"
 using namespace std;
 
-struct Puppe {
-    string name;
-    float len=-1;
-    float diam=-1;
-    int fix = -1;
-};
 
-struct KS {
-    string name;
-    int rooms=-1;
-    int work=-1;
-    float kpd=-1;
-};
 template <typename T1>
 T1 proverka(T1 min, T1 max) {
     T1 i;
@@ -33,7 +23,7 @@ T1 proverka(T1 min, T1 max) {
     }
 }
 
-fstream& operator >> (fstream& f, Puppe& p) {
+fstream& operator >> (fstream& f, Pipe& p) {
     getline(f>>ws, p.name);
     f >> p.len; 
     f >> p.diam; 
@@ -66,17 +56,17 @@ fstream& operator >> (fstream& f, KS& k) {
     return f;
 }
 
-fstream& operator << (fstream& in, Puppe& puppe) {
-    if (puppe.name != "") {
-        in << puppe.name << '\n';
+fstream& operator << (fstream& in, Pipe& pipe) {
+    if (pipe.name != "") {
+        in << pipe.name << '\n';
     }
     else {
         cout << "No Pipe" << endl;
         return in;
     }
-    in << puppe.len << '\n';
-    in << puppe.diam << '\n';
-    in << puppe.fix << '\n';
+    in << pipe.len << '\n';
+    in << pipe.diam << '\n';
+    in << pipe.fix << '\n';
     return in;
 }
 
@@ -94,16 +84,16 @@ fstream& operator << (fstream& in, KS& ks) {
     return in;
 }
 
-istream& operator >> (istream& in, Puppe& puppe) {
+istream& operator >> (istream& in, Pipe& pipe) {
     cout << "Enter name:" << endl;
     in.ignore(1000, '\n');
-    getline(in, puppe.name);
+    getline(in, pipe.name);
     cout << "Enter length:" << endl;
-    puppe.len = proverka(0.01, 10000.0);
+    pipe.len = proverka(0.01, 10000.0);
     cout << "Enter diametr:" << endl;
-    puppe.diam = proverka(0.01, 10000.0);
+    pipe.diam = proverka(0.01, 10000.0);
     cout << "Enter fix:" << endl;
-    puppe.fix = proverka(0, 1);
+    pipe.fix = proverka(0, 1);
     return in;
 }
 
@@ -120,12 +110,12 @@ istream& operator >> (istream& in, KS& ks) {
     return in;
 }
 
-ostream& operator << (ostream& ou, Puppe& puppe) {
-    if (puppe.len != -1) {
-        ou << "Pipe:\n" << "Name: " << puppe.name << endl;
-        ou << "len: " << puppe.len << endl;
-        ou << "diam: " << puppe.diam << endl;
-        ou << "fix: " << puppe.fix << endl;
+ostream& operator << (ostream& ou, Pipe& pipe) {
+    if (pipe.len != -1) {
+        ou << "Pipe:\n" << "Name: " << pipe.name << endl;
+        ou << "len: " << pipe.len << endl;
+        ou << "diam: " << pipe.diam << endl;
+        ou << "fix: " << pipe.fix << endl;
     }
     return ou;
 }
@@ -140,7 +130,7 @@ ostream& operator << (ostream& ou, KS& ks) {
     return ou;
 }
 
-void setFix(Puppe& chfx) {
+void setFix(Pipe& chfx) {
     if (chfx.diam == -1) {
         cout << "No pipe" << endl;
         return;
@@ -158,22 +148,22 @@ void setWork(KS& chwk) {
     chwk.work = proverka(0, 1);
 }
 
-void WriteToFile(fstream& f, Puppe& puppe, KS& ks) {
+void WriteToFile(fstream& f, Pipe& pipe, KS& ks) {
     string ind = "0";
-    if (puppe.name != "") {
+    if (pipe.name != "") {
         ind = "1";
     }
     (ks.name != "")?  ind += " 1": ind += " 0";
     f << ind<<'\n';
-    if (puppe.name != "") {
-        f << puppe;
+    if (pipe.name != "") {
+        f << pipe;
 
     }
     f << ks;
     f.close();
 }
 
-void ReadFile(Puppe& p, KS& k, fstream& file) {
+void ReadFile(Pipe& p, KS& k, fstream& file) {
     string ind;
     getline(file >> ws, ind);
     if (ind[0] == '1') { file >> p; }
@@ -190,7 +180,7 @@ int main()
         cout << "Error open file";
         return 0; 
     }
-    Puppe puppe1;
+    Pipe pipe1;
     KS ks1;
     int choice;
     bool fl = 1;
@@ -205,20 +195,20 @@ int main()
         }
         switch (choice) {
         case 1:
-            cin >> puppe1; break;
+            cin >> pipe1; break;
         case 2:
             cin >> ks1; break;
         case 3:
-            setFix(puppe1); break;
+            setFix(pipe1); break;
         case 4:
             setWork(ks1); break;
         case 5:
             file.seekp(0, ios::beg);
-            WriteToFile(file, puppe1, ks1); break;
+            WriteToFile(file, pipe1, ks1); break;
         case 6:
-            ReadFile(puppe1, ks1, file); break;
+            ReadFile(pipe1, ks1, file); break;
         case 7:
-            cout << puppe1;
+            cout << pipe1;
             cout << ks1;
             break;
         case 8:
