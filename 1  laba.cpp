@@ -2,12 +2,11 @@
 #include <string>
 #include <fstream>
 #include <typeinfo>
+#include <ctime>
 #include "Pipe.h"
 #include "KS.h"
 using namespace std;
-
-
-
+/*
 fstream& operator >> (fstream& f, Pipe& p) {
     getline(f>>ws, p.name);
     f >> p.len; 
@@ -95,15 +94,7 @@ istream& operator >> (istream& in, KS& ks) {
     return in;
 }
 
-ostream& operator << (ostream& ou, Pipe& pipe) {
-    if (pipe.len != -1) {
-        ou << "Pipe:\n" << "Name: " << pipe.name << endl;
-        ou << "len: " << pipe.len << endl;
-        ou << "diam: " << pipe.diam << endl;
-        ou << "fix: " << pipe.fix << endl;
-    }
-    return ou;
-}
+
 
 ostream& operator << (ostream& ou, KS& ks) {
     if (ks.rooms != -1) {
@@ -114,6 +105,7 @@ ostream& operator << (ostream& ou, KS& ks) {
     }
     return ou;
 }
+
 
 void setFix(Pipe& chfx) {
     if (chfx.diam == -1) {
@@ -157,10 +149,128 @@ void ReadFile(Pipe& p, KS& k, fstream& file) {
     cout << p;
     cout << k;
 }
+*/
+
+#define LOG_FILE "log.txt";
+
+#define CURRENT_TIME() [] {\
+    time_t now = time(0);\
+    tm* ltm = localtime(&now);\
+    char buffer[20];\
+    strftime(buffer, sizeof(buffer), %Y-%m-%d %H:%M:%S, ltm);\
+    return string(buffer);\
+}()
+
+#define LOG(level, massege){\
+    ofstream logFile(LOG_FILE, ios_base::app);\
+    if (logFile.is_open()){\
+        logFile << "["<<CURRENT_TIME<<"] ["<< level << "] "<<massege<<endl;\
+        logFile.close();\
+    } else { \
+        cerr << "Error opening log file"<<endl;}\
+}
+
+#define LOG_INFO(massege) LOG("INFO", massege)
+#define LOG_ERROR(massege) LOG("ERROR", massege)
+
+
+void LoadFromFile(fstream& f, unordered_map<int, Pipe>& p, unordered_map<int, KS>& k) {
+    string Fname;
+    cout << "Enter File name" << endl;
+    cin >> Fname;
+    fstream file(Fname);
+    string ind;
+    getline(f >> ws, ind);
+    if (!stoi(ind)) {
+        cout << "Wrong data in file" << endl;
+        return;
+    }
+    int count = stoi(ind);
+    if (stoi(ind) != 0) {
+        FtoPipemap(count, p, f);
+    }
+    getline(f >> ws, ind);
+    if (!stoi(ind)) {
+        cout << "Wrong data in file" << endl;
+        return;
+    }
+    count = stoi(ind);
+    if (stoi(ind) != 0) {
+        //FtoKSmap(count, p, f);
+    }
+}
+
+void SaveToFile(unordered_map<int, Pipe>& p, unordered_map<int, KS>& k) {
+    string Fname;
+    cout << "Enter File name" << endl;
+    getline(cin, Fname);
+    fstream f(Fname);
+    string ind;
+    ind = to_string(p.size());
+    f << ind << '\n';
+    ind = to_string(p.size());
+    f << ind << '\n';
+    f << p;
+    //f << k;
+    f.close();
+}
+
+void Pack(vector<int> vec, unordered_map<int, Pipe>& p, unordered_map<int, KS>& k) {
+    int ch1, ch2;
+    cout << "1. Delete\n2. Edit" << endl;
+    cin >> ch1;
+    cout << "1. Pipe\n2. KS" << endl;
+    switch (ch2) {
+    case 1:
+        switch (ch1) {
+        case 1: DeletePackPipe(p, vec);
+        case 2: EditPackPipe(p, vec);
+        }
+    case 2:
+        switch (ch2) {
+        case 1: //DeletePackKS(k, vec);
+        case 2: //EditPackKS(k, vec);
+        }
+    }
+}
+
+vector<int> HandVec(unordered_map<int, Pipe>& p) {
+    vector<int> vec;
+    int id;
+    cout << "Enter id of pipes. For stop press -1" << endl;
+    while (true) {
+        cin >> id;
+        if (id == -1) { return vec; }
+        auto it = p.find(id);
+        if (it != p.end()) {
+            vec.push_back(it->first);
+        }
+        else { cout << "Wrong id. Try again: "; }
+    }
+}
+
+vector<int> MakeVec(unordered_map<int, Pipe>& p) {
+    vector<int> vec;
+    int choice;
+    cout << "1. I want to enter id\n2. I want to sort map" << endl;
+    cin >> choice;
+    switch (choice) {
+    case 1:
+        return HandVec(p);
+    case 2:
+        int flag;
+        while (flag) {
+            cout << "Do you want to continue finding?(0, 1)" << endl;
+            cin >> flag;
+            FindForParam(p, vec);
+        }
+    }
+    return vec;
+}
 
 int main()
 {
-    fstream file("file1.txt");
+ /*   fstream file("file1.txt");
     if (!file.is_open()) {
         cout << "Error open file";
         return 0; 
@@ -201,5 +311,5 @@ int main()
         default:
             cout << "Enter number from menu" << endl;
         }
-    }
+    }*/
 }
