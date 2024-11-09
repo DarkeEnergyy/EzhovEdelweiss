@@ -7,21 +7,37 @@
 #include "Pipe.h"
 #include "KS.h"
 #include "Proverka.h"
+#include <chrono>
+#include <format>
 
 //ID and NextID without ++
 //logging from Git
 //cout vec
-
+using namespace chrono;
 using namespace std;
 
-#include <iostream>
-#include <fstream>
-#include <string>
 
-#include <iostream>
-#include <fstream>
-#include <streambuf>
-#include <string>
+#define INPUT_LINE(in, str) getline(in>>std::ws, str); \
+						std::cerr << str << std::endl
+#define PRINT_PARAM(out, x) out<< #x << "=" << x << std::endl
+class redirect_output_wrapper
+{
+    std::ostream& stream;
+    std::streambuf* const old_buf;
+public:
+    redirect_output_wrapper(std::ostream& src)
+        :old_buf(src.rdbuf()), stream(src)
+    {
+    }
+    ~redirect_output_wrapper() {
+        stream.rdbuf(old_buf);
+    }
+    void redirect(std::ostream& dest)
+    {
+        stream.rdbuf(dest.rdbuf());
+    }
+};
+
 
 
 class CinLogger : public streambuf {
@@ -491,9 +507,15 @@ int main()
     if (!file.is_open()) {
         cout << "Error open file";
         return 0;
-    }*/
+    }
     //try {
         //CinLogger logger(cin, "LOG.txt");
+        */
+    redirect_output_wrapper cerr_out(cerr);
+    string time = std::format("{:%d_%m_%Y %H_%M_%OS}", system_clock::now());
+    ofstream logfile("log_" + time);
+    if (logfile)
+        cerr_out.redirect(logfile);
 
     vector<int> vecPipe, vecKS;
     unordered_map<int, Pipe> pipeMap;
