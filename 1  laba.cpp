@@ -13,92 +13,47 @@
 //ID and NextID without ++
 //logging from Git
 //cout vec
-using namespace chrono;
 using namespace std;
+using namespace chrono;
 
 
 #define INPUT_LINE(in, str) getline(in>>std::ws, str); \
 						std::cerr << str << std::endl
 #define PRINT_PARAM(out, x) out<< #x << "=" << x << std::endl
-class redirect_output_wrapper
-{
-    std::ostream& stream;
-    std::streambuf* const old_buf;
-public:
-    redirect_output_wrapper(std::ostream& src)
-        :old_buf(src.rdbuf()), stream(src)
-    {
-    }
-    ~redirect_output_wrapper() {
-        stream.rdbuf(old_buf);
-    }
-    void redirect(std::ostream& dest)
-    {
-        stream.rdbuf(dest.rdbuf());
-    }
-};
 
+//
+//class CinLogger : public streambuf {
+//public:
+//    CinLogger(istream& input, const string& filename)
+//        : originalBuffer(input.rdbuf()), logFile(filename, ios::out) {
+//        if (!logFile.is_open()) {
+//            throw ios_base::failure("Не удалось открыть файл для логирования.");
+//        }
+//        input.rdbuf(this);
+//    }
+//
+//    ~CinLogger() {
+//        cin.rdbuf(originalBuffer);
+//        if (logFile.is_open()) {
+//            logFile.close();
+//        }
+//    }
+//
+//protected:
+//    int overflow(int c) override {
+//        if (c != EOF) {
+//            logFile.put(static_cast<char>(c));
+//            logFile.flush();
+//        }
+//        return originalBuffer->sputc(c);
+//    }
+//
+//private:
+//    streambuf* originalBuffer;
+//    ofstream logFile;
+//};
+//
 
-
-class CinLogger : public streambuf {
-public:
-    CinLogger(istream& input, const string& filename)
-        : originalBuffer(input.rdbuf()), logFile(filename, ios::out) {
-        if (!logFile.is_open()) {
-            throw ios_base::failure("Не удалось открыть файл для логирования.");
-        }
-        input.rdbuf(this);
-    }
-
-    ~CinLogger() {
-        cin.rdbuf(originalBuffer);
-        if (logFile.is_open()) {
-            logFile.close();
-        }
-    }
-
-protected:
-    int overflow(int c) override {
-        if (c != EOF) {
-            logFile.put(static_cast<char>(c));
-            logFile.flush();
-        }
-        return originalBuffer->sputc(c);
-    }
-
-private:
-    streambuf* originalBuffer;
-    ofstream logFile;
-};
-
-
-int& ProverCin(int min, int max) {
-    int choice;
-    while (true) {
-        cin >> choice;
-        if (cin.fail() || min > choice || max < choice) {
-            cin.clear();
-            cin.ignore(1000, '\n');
-            cout << "Enter correct data" << endl;
-            continue;
-        }
-        return choice;
-    }
-}
-
-template<typename T>
-void OutVec (vector<int>& vec, unordered_map<int, T>& p) {
-    for (auto& a : vec) {
-        auto it = p.find(a);
-        if (it != p.end()) {
-            cout << it->second << endl;
-        }
-        else {
-            cout << "Wrong element in vector" << endl;
-        }
-    }
-    cout << endl;
-}
 
 unordered_map<int, Pipe>& FtoPipemap(int& count, unordered_map<int, Pipe>& map, fstream& f) {
     map.clear();
@@ -108,10 +63,8 @@ unordered_map<int, Pipe>& FtoPipemap(int& count, unordered_map<int, Pipe>& map, 
     int fix = -1;
     double a;
     for (int j = 0; j < count; j++) {
-        getline(f>>ws, nam);
-        f >> len;
-        f >> diam;
-        f >> fix;
+
+
         if (nam == "") {
             return map;
         }
@@ -125,39 +78,29 @@ unordered_map<int, Pipe>& FtoPipemap(int& count, unordered_map<int, Pipe>& map, 
     }
     return map;
 }
+
 //pipe in
 Pipe newPipe() {
     Pipe pipe;
-    string nam;
-    cout << "Enter name:" << endl;
-    cin.ignore(1000, '\n');
-    getline(cin, nam);
-    pipe.setName(nam);
-    cout << "Enter length:" << endl;
-    pipe.setLen(proverka(0.01, 10000.0));
-    cout << "Enter diametr:" << endl;
-    pipe.setDiam(proverka(0.01, 10000.0));
-    cout << "Enter fix:" << endl;
-    pipe.setFix(proverka(0, 1));
+    cin >> pipe;
     return pipe;
 }
 void PipeToMap(unordered_map<int, Pipe>& p) {
     Pipe pipe = newPipe();
     p.emplace(pipe.getID(), pipe);
 }
+
 void changeFix(unordered_map<int, Pipe>& p) {
     cout << "Enter id of changing pipe" << endl;
     int idfind = proverka(1, 10000);
     bool fl = 0;
-    for (auto& [id, pipe] : p) {
-        if (id == idfind) {
-            pipe.setFix(proverka(0, 1));
-            fl = 1;
-        }
+    if (p.contains(idfind))
+    {
+        cout << "enter fix: " << endl;
+        p[idfind].setFix(proverka(0, 1));
     }
-    if (!fl) {
-        cout << "Wrong id" << endl;
-    }
+    else
+        cout << "no id" << endl;
 }
 void DeletePackPipe(unordered_map<int, Pipe>& p, vector<int>& vec) {
     if (vec.size() == 0) { cout << "No pipes for delete(vec0)" << endl; return; }
@@ -192,14 +135,14 @@ vector<int> FindForParam(unordered_map<int, Pipe>& p, vector<int>& vec) {
     double diam = -1;
     int fix = -1;
     cout << "For what do you want to find: \n1. Name\n2. Length\n3. Diametr \n4. Fix" << endl;
-    switch (ProverCin(1, 4)) {
+    switch (proverka(1, 4)) {
     case 1: cin.ignore(100, '\n'); getline(cin >> ws, name); break;
     case 2: len = proverka(0.0, 10000.0); break;
     case 3: diam = proverka(0.0, 10000.0); break;
     case 4: fix = proverka(0, 1); break;
     }
     cout << "Where you want to find: \n1. Map \n2.Vec" << endl;
-    switch (ProverCin(1,2)) {
+    switch (proverka(1,2)) {
     case 1:
         for (auto& [id, pipe] : p) {
             if (pipe.getFix() == fix || pipe.getDiam() == diam || pipe.getLen() == len || pipe.getName() == name) {
@@ -278,14 +221,14 @@ vector<int> FindForParam(unordered_map<int, KS>& k, vector<int>& vecKs) {
     double work = -1;
     int kpd = -1;
     cout << "For what do you want to find: \n1. Name\n2. Roomgth\n3. Worketr \n4. Kpd" << endl;
-    switch (ProverCin(1,4)) {
+    switch (proverka(1,4)) {
     case 1: cin.ignore(100, '\n'); getline(cin >> ws, name); break;
     case 2: room = proverka(0, 10000); break;
     case 3: work = proverka(0, 10000); break;
     case 4: kpd = proverka(0, 100); break;
     }
     cout << "Where you want to find: \n1. Map \n2.vec" << endl;
-    switch (ProverCin(1, 2)) {
+    switch (proverka(1, 2)) {
     case 1:
         for (auto& [id, ks] : k) {
             if (ks.getKpd() == kpd || ks.getWork() == work || ks.getRoom() == room || ks.getName() == name) {
@@ -353,103 +296,22 @@ void EditPackKS(unordered_map<int, KS>& k, vector<int>& vecKs) {
     }
 }
 
-vector<int> HandVec(unordered_map<int, KS>& k) {
-    vector<int> vec;
-    int id;
-    cout << "Enter id of ks. For stop press -1" << endl;
-    while (true) {
-        cin >> id;
-        if (id == -1) { OutVec(vec, k); return vec; }
-        auto it = k.find(id);
-        if (it != k.end()) {
-            vec.push_back(it->first);
-        }
-        else { cout << "Wrong id. Try again: "; }
-    }
-}
-vector<int> HandVec(unordered_map<int, Pipe>& p) {
-    vector<int> vec;
-    int id;
-    cout << "Enter id of pipes. For stop press -1" << endl;
-    while (true) {
-        cin >> id;
-        if (id == -1) { OutVec(vec, p); return vec; }
-        auto it = p.find(id);
-        if (it != p.end()) {
-            vec.push_back(it->first);
-        }
-        else { cout << "Wrong id. Try again: "; }
-    }
-}
-pair<vector<int>, int> MakeVec(unordered_map<int, Pipe>& p, unordered_map<int, KS>& k) {
-    vector<int> vec;
-    int h = 0;
-    cout << "1. I want to enter id\n2. I want to filtr map or vec" << endl;
-    switch (ProverCin(1, 2)) {
-    case 1:
-    {
-        cout << "1. Pipe\n2. KS" << endl;
-        switch (ProverCin(1, 2))
-        {
-        case 1: {
-            vec = HandVec(p);
-            h = 1;
-            break;
-        }
-        case 2: {
-            vec = HandVec(k);
-            h = 2;
-            break;
-        }
 
-        }
-        break;
-    }
-    case 2: {
-        int flag = 1;
-        cout << "1. Pipe\n2. KS" << endl;
-        switch (ProverCin(1, 2)) {
-        case 1: {
-            while (flag) {
-                vec = FindForParam(p, vec);
-                cout << "Do you want to continue finding?(0, 1)" << endl;
-                h = 1;
-                cin >> flag;
-            }
-            break;
-        }
-        case 2: {
-            while (flag) {
-                vec = FindForParam(k, vec);
-                cout << "Do you want to continue finding?(0, 1)" << endl;
-                h = 2;
-                cin >> flag;
-            }
-            break;
-        }
-        }
-        break;
-    }
-    }
-    return make_pair(vec, h);
-}
-
-
-void Pack(vector<int>& vecP, vector<int>& vecK, unordered_map<int, Pipe>& p, unordered_map<int, KS>& k) {
-    if (vecP.size() == 0) { vecP = MakeVec(p, k).first; }
+void Pack(vector<int>& vecP, vector<int>& vecK, unordered_map<int, Pipe>& p, unordered_map<int, KS>& k) {//??
+    if (vecP.size() == 0) { vecP = MakeVec(p); }
     cout << "1.Pipe\n2. KS" << endl;
     cout << "1. Delete\n2. Edit" << endl;
-    int ch = ProverCin(1, 2);
+    int ch = proverka(1, 2);
     switch (ch) {
     case 1: {
-        switch (ProverCin(1, 2)) {
+        switch (proverka(1, 2)) {
         case 1: DeletePackPipe(p, vecP); break;
         case 2: EditPackPipe(p, vecP); break;
         }
         break;
     }
     case 2: {
-        switch (ProverCin(1, 2)) {
+        switch (proverka(1, 2)) {
         case 1: DeletePackKS(k, vecK); break;
         case 2: EditPackKS(k, vecK); break;
         }
@@ -503,14 +365,6 @@ void SaveToFile(unordered_map<int, Pipe>& p, unordered_map<int, KS>& k) {
 
 int main()
 {
-    /*fstream file("file1.txt");
-    if (!file.is_open()) {
-        cout << "Error open file";
-        return 0;
-    }
-    //try {
-        //CinLogger logger(cin, "LOG.txt");
-        */
     redirect_output_wrapper cerr_out(cerr);
     string time = std::format("{:%d_%m_%Y %H_%M_%OS}", system_clock::now());
     ofstream logfile("log_" + time);
@@ -526,7 +380,7 @@ int main()
         cout << "\n1. Add Pipe to map\n2. Add KS to map\n3. Change fixing status\n4. Change number of working\
 KS\n5. Write to file\n6. Read from file\n7. Read data\n8. Choose some pipes or kss(Create vec)\n9. Delete vector\n10. Package edit\n\
 11. Filter Pipes(Make vec)\n12. Filter Kss(Make vec)\n13 Read vector\n0. Exit" << endl;
-        switch (ProverCin(0, 13)) {
+        switch (proverka(0, 13)) {
         case 1:
             PipeToMap(pipeMap); break;
         case 2:
@@ -543,18 +397,28 @@ KS\n5. Write to file\n6. Read from file\n7. Read data\n8. Choose some pipes or k
             cout << "Map of pipe: " << endl << pipeMap;
             cout << "Map of ks: " << endl << ksMap;
             break;
-        case 8: {
-            auto res = MakeVec(pipeMap, ksMap);
-            if (res.second == 1) {
-                vecPipe = res.first;
+        case 8:
+        {
+            //cout << "1. I want to enter id\n2. I want to filtr map or vec" << endl;
+            cout << "1. Pipe\n2. KS" << endl;
+            switch (proverka(1, 2))
+            {
+            case 1:
+            {
+                vecPipe = MakeVec(pipeMap);
+                break;
             }
-            else {
-                vecKS = res.first;
+            case 2:
+            {
+                vecKS = MakeVec(ksMap);
+                break;
             }
-        }break;
+            }
+            break;
+        }
         case 9:
             cout << "1. Delete vector of Pipes\n2. Delete vector of Kss" << endl;
-            switch (ProverCin(1, 2)) {
+            switch (proverka(1, 2)) {
             case 1:
                 vecPipe = {}; break;
             case 2:
@@ -568,7 +432,7 @@ KS\n5. Write to file\n6. Read from file\n7. Read data\n8. Choose some pipes or k
             vecKS = FindForParam(ksMap, vecPipe); break;
         case 13:
             cout << "1. Cout vector of Pipes\n2. Cout vector of Kss" << endl;
-            switch (ProverCin(1, 2)) {
+            switch (proverka(1, 2)) {
             case 1: {
                 for (auto a : vecPipe) {
                     cout << a << ", ";
@@ -579,7 +443,7 @@ KS\n5. Write to file\n6. Read from file\n7. Read data\n8. Choose some pipes or k
                     cout << a << ", ";
                 }
             } break;
-            cout << endl;
+                cout << endl;
             }break;
         case 0:
             fl = 0; break;
@@ -592,3 +456,4 @@ KS\n5. Write to file\n6. Read from file\n7. Read data\n8. Choose some pipes or k
         cerr << "Error: " << e.what() << endl;
     }*/
 }
+

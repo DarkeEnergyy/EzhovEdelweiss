@@ -17,7 +17,7 @@ int KS::getRoom() const { return room; }
 int KS::getWork() const { return work; }
 double KS::getKpd() const { return kpd; }
 int KS::getID() const { return id; }
-int KS::getNextId() const { return ++next_id; }
+int KS::getNextId() { return ++next_id; }
 
 void KS::setName(string name) {
 	this->name = name;

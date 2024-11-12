@@ -19,7 +19,7 @@ public:
     int getWork() const;
     double getKpd() const;
     int getID() const;
-    int getNextId() const;
+    static int getNextId();
 
     void setName(string name);
     void setRoom(int room);
