@@ -1,5 +1,7 @@
 #pragma once
 #include <string>
+#include <iostream>
+#include <fstream>
 using namespace std;
 
 class Pipe {
@@ -9,7 +11,7 @@ private:
     double len = -1;
     double diam = -1;
     int fix = -1;
-    int id;
+    int id = -1;
 public:
     Pipe();
     Pipe(std::fstream& in);
@@ -25,13 +27,13 @@ public:
     //void setName(string name);
     //void setLen(double len);
     //void setDiam(double diam);
+    void setNext_ID(int next);
     void setFix(int Fix);
-    //void printPipe();
 
 
     friend ostream& operator << (ostream& ou, const Pipe& pipe);                                            //cout pipe
     friend fstream& operator << (fstream& out, const Pipe& pipe);                                                  //pipe to file for "map to file"
     friend fstream& operator >> (fstream& f, Pipe& pipe);                                                  //pipe to file for "map to file"
-    friend istream& operator >> (istream& in, Pipe& pipe);                                                  
+    friend istream& operator >> (istream& in, Pipe& pipe);                  
 
 };

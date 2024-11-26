@@ -133,6 +133,7 @@
     <ClCompile Include="Pipe.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Header.h" />
     <ClInclude Include="KS.h" />
     <ClInclude Include="Pipe.h" />
   </ItemGroup>
