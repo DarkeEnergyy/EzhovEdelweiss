@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include "Proverka.h"
 using namespace std;
 
 class Pipe {
@@ -12,6 +13,8 @@ private:
     double diam = -1;
     int fix = -1;
     int id = -1;
+    int inKs;
+    int outKs;
 public:
     Pipe();
     Pipe(std::fstream& in);
@@ -21,14 +24,17 @@ public:
     double getDiam() const;
     int getFix() const;
     int getID() const;
-    static int getNextId();
+    static int getNextId() { return next_id; }
+    int getInKs();
+    int getOutKs();
 
-    ////void setID(int id) {};
-    //void setName(string name);
-    //void setLen(double len);
-    //void setDiam(double diam);
-    void setNext_ID(int next);
+    static void setNext_ID(const unordered_map<int, Pipe>& all)
+    {
+        next_id = MaxKey(all);
+    }
     void setFix(int Fix);
+    void setInKs(int idKs);
+    void setOutKs(int outKs);
 
 
     friend ostream& operator << (ostream& ou, const Pipe& pipe);                                            //cout pipe

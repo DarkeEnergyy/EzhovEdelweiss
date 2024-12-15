@@ -2,7 +2,9 @@
 #include <iostream>
 #include <fstream>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
+#include <string>
 
 class redirect_output_wrapper
 {
@@ -22,82 +24,109 @@ public:
     }
 };
 
-
+std::string InputString();
 
 template <typename T1>
 T1 proverka(T1 min, T1 max) {
-    std::cout << "Enter number in range: " << min << "; " << max << std::endl;
+    std::cout<< "Enter number in range: " << min << "; " << max << std::endl;
     while (true) {
         T1 j;
         std::cin >> j;
         if (std::cin.fail() || j < min || j>max) {
+            std::cout<< "Enter Correct data" << std::endl;
+            std::cin.clear();
+            std::cin.ignore(100, '\n');
+            continue;
+        }
+        std::cerr << j << std::endl;;
+        return j;
+    }
+}
+
+template <typename T1>
+T1 proverka(T1 val, T1 val1, T1 val2, T1 val3) {
+    std::cout << "Enter number in range: " << min << "; " << max << std::endl;
+    while (true) {
+        T1 j;
+        std::cin >> j;
+        if (std::cin.fail() || (j != val && j != val1 && j != val2 && j != val3)) {
             std::cout << "Enter Correct data" << std::endl;
             std::cin.clear();
             std::cin.ignore(100, '\n');
             continue;
         }
-        cerr << j << endl;;
+        std::cerr << j << std::endl;;
+        return j;
+    }
+}
+
+template <typename T>
+int proverka(std::unordered_map<int, T> map) {
+    while (true) {
+        int j;
+        std::cin >> j;
+        if (std::cin.fail() || j < 0 || j > MaxKey(map) || !(map.contains(j))) {
+            std::cout << "Enter Correct data" << std::endl;
+            std::cin.clear();
+            std::cin.ignore(100, '\n');
+            continue;
+        }
+        std::cerr << j << std::endl;;
         return j;
     }
 }
 
 template<typename T>
-void OutVec(vector<int>& vec, unordered_map<int, T>& p) {
+void OutVec(std::vector<int>& vec, std::unordered_map<int, T>& p) {
     for (auto& a : vec) {
         auto it = p.find(a);
         if (it != p.end()) {
-            cout << it->second << endl;
+            std::cout<< it->second << std::endl;
         }
         else {
-            cout << "Wrong element in vector" << endl;
+            std::cout<< "Wrong element in vector" << std::endl;
         }
     }
-    cout << endl;
+    std::cout<< std::endl;
 }
 
 template <typename T>
-int MaxKey(unordered_map<int, T>& map) {
+int MaxKey(const std::unordered_map<int, T>& map) {
     int maxKey = 0;
-    for (auto& it : map) {
-        maxKey = max(maxKey, it.first);
+    for (auto& [k, v] : map) {
+        maxKey = maxKey > k ? maxKey : k;
     }
-    if (maxKey == 0) { cout << "Empty map" << endl; }
+    if (maxKey == 0) { std::cout<< "Empty map" << std::endl; }
     return maxKey;
 }
 
 template <typename T>
-std::vector <int> HandVec(unordered_map<int, T>& k) {
-    std::vector<int> vec;
+std::vector <int> HandVec(std::unordered_map<int, T>& k) {
+    std::unordered_set<int> ids;
     int id;
-    cout << "Enter obj's id. For stop press 0" << endl;
-    cerr << "Entered id: " << endl;
+    std::cout<< "Enter obj's id. For stop press 0" << std::endl;
+   // std::cerr << "Entered id: " << std::endl;
     int i = MaxKey(k) + 1;
     while (true) {
         id = proverka<int>(0, i);
         if (id == 0) 
         {
-            return vec; 
-        }
-        if (std::find(vec.begin(), vec.end(), id) != vec.end()) {
-            cout << "Pipe with this ID just added" << endl;
+            return std::vector<int> (ids.begin(), ids.end());
         }
         if (k.contains(id))
-            vec.push_back(id);
-        cout << "Pipe added" << endl;
-        else {
-            cout << "Wrong id. Try again: ";
-            cerr << "Wrong id" << endl;
-        }
+            ids.insert(id);
+        else 
+            std::cout<< "Wrong id. Try again: ";
     }
 }
 
 template <typename T>
-std::vector<int> MakeVec(unordered_map<int, T>& objs) {
-    vector<int> vec;
-    int h = 0;
-    cout << "1. I want to enter id\n2. I want to filtr map or vec" << endl;
-    cerr << "Make vector for id or filtr(1, 2): ";
-    switch (proverka(1, 2)) {
+std::vector<int> MakeVec(std::unordered_map<int, T>& objs) {
+    std::vector<int> vec;
+    std::cout << "1. I want to enter id\n2. I want to filtr map or vec" << std::endl;
+    //cerr << "Make vector for id or filtr(1, 2): ";
+    switch (proverka(1, 2))
+    {
     case 1:
     {
         vec = HandVec(objs);
@@ -108,12 +137,10 @@ std::vector<int> MakeVec(unordered_map<int, T>& objs) {
         int flag = 1;
         while (flag) {
             vec = FindForParam(objs, vec);
-            cout << "Do you want to continue finding?(0, 1)" << endl;
-            h = 1;
-            cerr << "Do you want to continue finding?(0, 1): ";
+            std::cout << "Do you want to continue finding?(0, 1)" << std::endl;
+            //cerr << "Do you want to continue finding?(0, 1): ";
             flag = proverka(0, 1);
         }
-
         break;
     }
     }
@@ -123,7 +150,7 @@ std::vector<int> MakeVec(unordered_map<int, T>& objs) {
 
 
 template <typename T>
-std::ostream& operator << (std::ostream& ou, std::unordered_map<int, T>& map) {
+std::ostream& operator << (std::ostream& ou, const std::unordered_map<int, T>& map) {
     for (auto& [id, item] : map) {
         ou << item;
     }
@@ -131,16 +158,9 @@ std::ostream& operator << (std::ostream& ou, std::unordered_map<int, T>& map) {
 }
 
 template <typename T>
-std::fstream& operator << (std::fstream& fou, std::unordered_map<int, T>& map) {
+std::fstream& operator << (std::fstream& fou, const std::unordered_map<int, T>& map) {
     for (auto& [id, item] : map) {
         fou << item;
     }
     return fou;
 }
-
-//
-//
-//fstream& operator << (fstream& file, unordered_map<int, Pipe>& p);                               //map to file
-//fstream& operator >> (fstream& file, unordered_map<int, Pipe>& p);                               //from file to map
-//ostream& operator << (ostream& out, unordered_map<int, Pipe>& p);                                //cout map
-//void operator >> (Pipe& pipe, unordered_map<int, Pipe>& p);

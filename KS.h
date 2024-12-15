@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <unordered_map>
+#include "Proverka.h"
 using namespace std;
 
 class KS {
@@ -23,11 +24,13 @@ public:
     static int getNextId();
     static int getCurID();
 
-    /////*void setName(string name);
-    //void setRoom(int room);
-    void setNext_ID(int next);
+
+    static void setNext_ID(const unordered_map<int, KS>& all)
+    {
+        next_id = MaxKey(all);
+    }
     void setWork(int work);
-    //void setKpd(int Kpd);
+
 
 
     friend ostream& operator << (ostream& ou, const KS& pipe);

@@ -8,7 +8,7 @@ using namespace std;
 
 int KS::next_id = 0;
 
-KS::KS() : id(getNextId()), name(""), room(-1), work(-1), kpd(-1) {}
+KS::KS() : id(++next_id), name(""), room(-1), work(-1), kpd(-1) {}
 
 KS::KS(fstream& in)
 {
@@ -22,7 +22,7 @@ int KS::getRoom() const { return room; }
 int KS::getWork() const { return work; }
 double KS::getKpd() const { return kpd; }
 int KS::getID() const { return id; }
-int KS::getNextId() { return ++next_id; }
+int KS::getNextId() { return next_id; }
 int KS::getCurID() { return next_id; }
 
 //void KS::setName(string name) {
@@ -34,12 +34,11 @@ int KS::getCurID() { return next_id; }
 // //void KS::setKpd(int kpd) {
 //	this->kpd = kpd;
 //}
-void KS::setNext_ID(int next) {
-    next_id = next;
-}
+
 void KS::setWork(int work) {
 	this->work = work;
 }
+
 
 
 
@@ -56,17 +55,16 @@ ostream& operator << (ostream& ou, const KS& ks) {
 istream& operator >> (istream& in, KS& ks)
 {
     cout << "Enter name:" << endl;
-    cin.ignore(1000, '\n');
-    getline(cin, ks.name);
-    cerr << ks.name << endl;
+    ks.name = InputString();
+    clog << ks.name << endl;
     cout << "Enter room:" << endl;
     ks.room = proverka(1, 10000);
     cout << "Enter work:" << endl;
     ks.work = proverka(1, 10000);
     cout << "Enter kpd:" << endl;
     ks.kpd = proverka(0.001, 100.0);
-    cout << "Enter id: " << endl;
-    ks.id = proverka(0, 1000);
+    // cout << "Enter id: " << endl;
+    // ks.id = proverka(0, 1000);
     return in;
 }
 fstream& operator << (fstream& out, KS& ks) {
