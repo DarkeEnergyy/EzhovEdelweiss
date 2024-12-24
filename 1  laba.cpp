@@ -62,8 +62,37 @@ void changeFix(unordered_map<int, Pipe>& p) {
         cout << "no id" << endl;
     }
 }
+
+// Шаблонная функция для проверки наличия объекта в графе
+template<typename T, typename Graph>
+bool isObjectInGraph(const Graph& graph, int id) {
+    // Проверка для Pipe
+    if constexpr (std::is_same_v<T, Pipe>) {
+        for (const auto& [from, edges] : graph.getsmejn()) {
+            for (const auto& edge : edges) {
+                if (edge.pipe_id == id) {
+                    return true; // Труба найдена в графе
+                }
+            }
+        }
+    }
+    // Проверка для KS (если необходимо)
+    else if constexpr (std::is_same_v<T, KS>) {
+        // Реализуйте аналогичную логику для KS, если требуется
+        // Для примера, пусть у нас есть метод для получения всех станций в графе
+        for (const auto& [from, edges] : graph.getsmejn()) {
+            for (const auto& edge : edges) {
+                if (edge.to == id || edge.from == id) { // Предположим, что KS имеет to в ребре
+                    return true; // Станция найдена в графе
+                }
+            }
+        }
+    }
+    return false; // Объект не найден в графе
+}
+
 template <typename T>
-void DeletePack(unordered_map<int, T>& p, vector<int>& vec) {
+void DeletePack(unordered_map<int, T>& p, vector<int>& vec, GasTransportGraph graph) {
     if (vec.size() == 0) 
     {
         cout << "No objects for delete(vec0)" << endl; 
@@ -72,7 +101,12 @@ void DeletePack(unordered_map<int, T>& p, vector<int>& vec) {
     }
     for (auto& id : vec) {
         if (p.contains(id)) {
-            p.erase(id);
+            if (isObjectInGraph<T>(graph, id)) {
+                cout << "Object " << id << " is in Graph. Do you realy want to delete it(Millions will die)?" << endl;
+                if (proverka(0, 1)) {
+                    p.erase(id);
+                }
+            }
         }
         else {
             clog << "Wrong element in vector" << endl;
@@ -198,8 +232,14 @@ void EditPackKS(unordered_map<int, KS>& k, vector<int>& vecKs) {
     clog << "Wrong element in vector" << endl;
 }
 
-void Pack(vector<int>& vecP, vector<int>& vecK, unordered_map<int, Pipe>& p, unordered_map<int, KS>& k) {//??
-    if (vecP.size() == 0) { vecP = MakeVec(p); }
+void Pack(vector<int>& vecP, vector<int>& vecK, unordered_map<int, Pipe>& p, unordered_map<int, KS>& k, GasTransportGraph graph) {
+    if (vecP.size() == 0) { 
+        cout << "1.Pipe\n2. KS" << endl;
+        if (proverka(1, 2) == 1) {
+            vecP = MakeVec(p);
+        }
+        else { vecK = MakeVec(k); }
+    }
     cout << "1.Pipe\n2. KS" << endl;
     cout << "1. Delete\n2. Edit" << endl;
     clog << "Pack: Pipe, Ks; Delete, Edit: " << endl;
@@ -207,14 +247,14 @@ void Pack(vector<int>& vecP, vector<int>& vecK, unordered_map<int, Pipe>& p, uno
     switch (ch) {
     case 1: {
         switch (proverka(1, 2)) {
-        case 1: DeletePack(p, vecP); break;
+        case 1: DeletePack(p, vecP, graph); break;
         case 2: EditPackPipe(p, vecP); break;
         }
         break;
     }
     case 2: {
         switch (proverka(1, 2)) {
-        case 1: DeletePack(k, vecK); break;
+        case 1: DeletePack(k, vecK, graph); break;
         case 2: EditPackKS(k, vecK); break;
         }
         break;
@@ -267,25 +307,16 @@ void ConnectStations(GasTransportGraph& graph, unordered_map<int, Pipe>& pipes, 
     int from, to;
     double diameter;
 
-    // Вывод доступных станций 
     cout << "Доступные КС:\n";
     for (const auto& [id, station] : stations) {
         cout << "ID: " << id << ", Название: " << station.getName() << endl;
     }
 
-    // Ввод ID станций 
     cout << "Введите ID станции отправления: ";
     from = proverka(stations);
     cout << "Введите ID станции назначения: ";
     to = proverka(stations);
 
-    // Проверка корректности ввода ID
-    /*if (stations.find(from) == stations.end() || stations.find(to) == stations.end()) {
-        cout << "Ошибка: одна из указанных станций не существует!" << endl;
-        return;
-    }*/
-
-    // Вывод доступных диаметров труб 
     cout << "Введите диаметр трубы для соединения (500, 700, 1000, 1400): ";
     diameter = proverka(500, 1400);
 
@@ -294,7 +325,6 @@ void ConnectStations(GasTransportGraph& graph, unordered_map<int, Pipe>& pipes, 
         return;
     }
 
-    // Поиск доступной трубы 
     for (auto& [id, pipe] : pipes) {
         if (pipe.getDiam() == diameter && pipe.getisAvailable() && !pipe.getFix()) {
             pipe.markAsUsed();
@@ -305,7 +335,7 @@ void ConnectStations(GasTransportGraph& graph, unordered_map<int, Pipe>& pipes, 
     }
 
     cout << "Создаем новую трубу...\n";
-    Pipe new_pipe = PipeToMap(pipes); // Создаём трубу (предполагается, что PipeToMap добавляет трубу в pipes)
+    Pipe new_pipe = PipeToMap(pipes);
 
     if (new_pipe.getDiam() == diameter && !new_pipe.getFix()) {
         int pipe_id = new_pipe.getID(); 
@@ -328,7 +358,7 @@ void DisconnectStations(GasTransportGraph& graph, unordered_map<int, Pipe>& pipe
     }
 
     if (graph.removeEdge(pipeId)) {
-        pipes[pipeId].setisAvailable(true); // Освобождаем трубу
+        pipes[pipeId].setisAvailable(true);
         cout << "Труба ID " << pipeId << " успешно отключена." << endl;
     }
     else {
@@ -432,7 +462,7 @@ int main()
                 vecKS = {}; break;
             } break;
         case 10:
-            Pack(vecPipe, vecKS, pipeMap, ksMap); break;
+            Pack(vecPipe, vecKS, pipeMap, ksMap, graph); break;
         case 11:
             vecPipe = FindForParam(pipeMap, vecPipe);
             break;

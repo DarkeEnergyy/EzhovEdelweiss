@@ -12,6 +12,7 @@ private:
     int work = -1;
     double kpd = -1;
     int id = -1;
+    bool inGraph = false;
 public:
     KS();
     KS(std::fstream& in);
@@ -23,6 +24,8 @@ public:
     int getID() const;
     static int getNextId();
     static int getCurID();
+    bool getinGraph();
+    void setinGraph(bool b);
 
 
     static void setNext_ID(const unordered_map<int, KS>& all)

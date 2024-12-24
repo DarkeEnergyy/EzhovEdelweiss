@@ -8,7 +8,8 @@ using namespace std;
 
 struct Edge {
     int pipe_id; 
-    int to;      
+    int to;
+    int from;
 };
 
 class GasTransportGraph {
@@ -17,7 +18,7 @@ private:
 
 public:
     void addEdge(int from, int to, int pipe_id) {
-        smejn[from].push_back({ pipe_id, to });
+        smejn[from].push_back({ pipe_id, to, from});
     }
 
     const unordered_map<int, vector<Edge>>& getsmejn() const {
