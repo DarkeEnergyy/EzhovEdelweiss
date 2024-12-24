@@ -129,12 +129,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="1  laba.cpp" />
+    <ClCompile Include="Graph.cpp" />
     <ClCompile Include="KS.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="Pipe.cpp" />
     <ClCompile Include="Proverka.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Graph.h" />
     <ClInclude Include="Header.h" />
     <ClInclude Include="KS.h" />
     <ClInclude Include="Node.h" />

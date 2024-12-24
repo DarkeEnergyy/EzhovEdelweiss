@@ -17,17 +17,24 @@ Pipe::Pipe(fstream& in)
 }
 Pipe::Pipe(string name, double len, double diam, int fix) : id(getNextId()), name(name), len(len), diam(diam), fix(fix) {}
 
+void Pipe::markAsUsed() {
+    isAvailable = false;
+}
 
-int Pipe::getInKs() { return inKs; }
-int Pipe::getOutKs() { return outKs; }
-void Pipe::setInKs(int idKs)
-{
-    inP.push_back(idP);
+bool Pipe::getisAvailable() const {
+    return isAvailable;
 }
-void Pipe::setOutKs(int idKs)
-{
-    outP.push_back(idP);
-}
+
+//int Pipe::getInKs() { return inKs; }
+//int Pipe::getOutKs() { return outKs; }
+//void Pipe::setInKs(int idKs)
+//{
+//    inP.push_back(idP);
+//}
+//void Pipe::setOutKs(int idKs)
+//{
+//    outP.push_back(idP);
+//}
 
 string Pipe::getName() const { return name;  }
 double Pipe::getLen() const { return len;  }

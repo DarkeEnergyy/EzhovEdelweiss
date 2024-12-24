@@ -13,8 +13,11 @@ private:
     double diam = -1;
     int fix = -1;
     int id = -1;
-    int inKs;
-    int outKs;
+    bool isAvailable = true;
+    //int inKs;
+    //int outKs;
+    
+
 public:
     Pipe();
     Pipe(std::fstream& in);
@@ -25,16 +28,19 @@ public:
     int getFix() const;
     int getID() const;
     static int getNextId() { return next_id; }
-    int getInKs();
-    int getOutKs();
+    /*int getInKs();
+    int getOutKs();*/
+    
+    bool getisAvailable() const;
+    void markAsUsed();
 
     static void setNext_ID(const unordered_map<int, Pipe>& all)
     {
         next_id = MaxKey(all);
     }
     void setFix(int Fix);
-    void setInKs(int idKs);
-    void setOutKs(int outKs);
+    /*void setInKs(int idKs);
+    void setOutKs(int outKs)*/;
 
 
     friend ostream& operator << (ostream& ou, const Pipe& pipe);                                            //cout pipe

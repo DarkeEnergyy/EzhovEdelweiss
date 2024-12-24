@@ -10,6 +10,8 @@
 #include "Filtr.h"
 #include <chrono>
 #include <format>
+#include "Graph.h"
+#include <clocale>
 
 
 using namespace std;
@@ -260,47 +262,132 @@ void SaveToFile(const unordered_map<int, Pipe>& p, const  unordered_map<int, KS>
     f.close();
 }
 
-void Connect(vector<KS> net, unordered_map<int, Pipe> p, unordered_map<int, KS> k) {
-    cout << "Enter id Ks Out then In" << endl;
-    int idOut = proverka(k);
-    int idIn = proverka(k);
+//void Connect(vector<KS> net, unordered_map<int, Pipe> p, unordered_map<int, KS> k) {
+//    cout << "Enter id Ks Out then In" << endl;
+//    int idOut = proverka(k);
+//    int idIn = proverka(k);
+//
+//    cout << "Enter diametr of pipe (500, 700, 1000, 1400)" << endl;
+//    int findDiam = proverka(500, 700, 1000, 1400);
+//    bool fl = 0;
+//    for (auto& pipe : p) {
+//        if (pipe.second.getDiam() == findDiam) {
+//            pipe.second.setOutKs(idOut);
+//            pipe.second.setInKs(idIn);
+//            fl = 1;
+//        }
+//    }
+//    if (!(fl)) {
+//        cout << "Pipe not found. Do you want to Create it?" << endl;
+//        if (proverka(0, 1)) {
+//            Pipe pipe = PipeToMap(p);
+//            pipe.setOutKs(idOut);
+//            pipe.setInKs(idIn);
+//        }
+//    }
+//}
 
-    cout << "Enter diametr of pipe (500, 700, 1000, 1400)" << endl;
-    int findDiam = proverka(500, 700, 1000, 1400);
-    bool fl = 0;
-    for (auto& pipe : p) {
-        if (pipe.second.getDiam() == findDiam) {
-            pipe.second.setOutKs(idOut);
-            pipe.second.setInKs(idIn);
-            fl = 1;
+//void connectStations(GasTransportGraph& graph, unordered_map<int, Pipe>& pipes, int from, int to, double diameter) {
+//    for (auto& [id, pipe] : pipes) {
+//        if (pipe.getDiam() == diameter && pipe.getisAvailable()) {
+//            pipe.markAsUsed();
+//            graph.addEdge(from, to, id);
+//            cout << "Соединены станции " << from << " и " << to << " с использованием трубы " << id << endl;
+//            return;
+//        }
+//    }
+//
+//    Pipe new_pipe("Новая труба", 100.0, diameter, 0);
+//    pipes[new_pipe.getID()] = new_pipe;
+//    graph.addEdge(from, to, new_pipe.getID());
+//    cout << "Создана и использована новая труба между станциями " << from << " и " << to << endl;
+//}
+
+
+void userConnectStations(GasTransportGraph& graph, unordered_map<int, Pipe>& pipes, unordered_map<int, KS>& stations) {
+    int from, to;
+    double diameter;
+
+    // Вывод доступных станций
+    cout << "Доступные КС:\n";
+    for (const auto& [id, station] : stations) {
+        cout << "ID: " << id << ", Название: " << station.getName() << endl;
+    }
+
+    // Ввод ID станций
+    cout << "Введите ID станции отправления: ";
+    from = proverka(pipes);
+    cout << "Введите ID станции назначения: ";
+    to = proverka(pipes);
+
+    // Вывод доступных диаметров труб
+    cout << "Введите диаметр трубы для соединения (500, 700, 1000, 1400): ";
+    diameter = proverka(500, 1400);
+
+    if (diameter != 500 && diameter != 700 && diameter != 1000 && diameter != 1400) {
+        cout << "Ошибка: недопустимый диаметр трубы!" << endl;
+        return;
+    }
+
+    // Поиск доступной трубы
+    for (auto& [id, pipe] : pipes) {
+        if (pipe.getDiam() == diameter && pipe.getisAvailable()) {
+            pipe.markAsUsed();
+            graph.addEdge(from, to, id);
+            cout << "Станции " << from << " и " << to << " соединены с использованием трубы ID " << id << endl;
+            return;
         }
     }
-    if (!(fl)) {
-        cout << "Pipe not found. Do you want to Create it?" << endl;
-        if (proverka(0, 1)) {
-            Pipe pipe = PipeToMap(p);
-            pipe.setOutKs(idOut);
-            pipe.setInKs(idIn);
-        }
+
+    // Если трубы подходящего диаметра нет, создаем новую
+    int Newid;
+    while (true) {
+        Pipe pip = PipeToMap(pipes);
+        if (pip.getDiam() == diameter) { 
+            Newid = pip.getID();
+            break; }
+        cout << "Wrong diametr, try again" << endl;
     }
+    graph.addEdge(from, to, Newid);
+}
+
+void displayGraph(const GasTransportGraph& graph, const unordered_map<int, KS>& stations, const unordered_map<int, Pipe>& pipes) {
+    cout << "\nГраф газотранспортной сети:\n";
+
+    for (const auto& [stationId, edges] : graph.getsmejn()) {
+        cout << "КС " << stationId << " (" << stations.at(stationId).getName() << ") -> ";
+        for (const auto& [toStation, pipeId] : edges) {
+            const auto& pipe = pipes.at(pipeId);
+            cout << "[КС " << toStation << ", труба " << pipeId << ", " << pipe.getDiam() << "] ";
+        }
+        cout << "\n";
+    }
+
+    if (graph.getsmejn().empty()) {
+        cout << "Граф пуст, соединений нет.\n";
+    }
+
+    cout << endl;
 }
 
 int Menu()
 {
     cout << "\n1. Add Pipe to map\n2. Add KS to map\n3. Change fixing status\n4. Change number of working\
 KS\n5. Write to file\n6. Read from file\n7. Read data\n8. Choose some pipes or kss(Create vec)\n9. Delete vector\n10. Package edit\n\
-11. Filter Pipes(Make vec)\n12. Filter Kss(Make vec)\n13 Read vector\n0. Exit" << endl;
-    return proverka(0, 13);
+11. Filter Pipes(Make vec)\n12. Filter Kss(Make vec)\n13 Read vector\n14. Connect kss \n15. Topological sort \n16. Diplay graph \n0. Exit" << endl;
+    return proverka(0, 16);
 }
 
 int main()
 {
+    setlocale(LC_ALL, "Russian");
     redirect_output_wrapper clog_out(cerr);
     string time = std::format("{:%d_%m_%Y %H_%M_%OS}", system_clock::now());
     ofstream logfile("log_" + time);
     if (logfile)
         clog_out.redirect(logfile);
 
+    GasTransportGraph graph;
     vector<int> network;
     vector<int> vecPipe, vecKS;
     unordered_map<int, Pipe> pipeMap;
@@ -367,6 +454,18 @@ int main()
                 cout << endl;
                 break;
             }
+        case 14: 
+        { userConnectStations(graph, pipeMap, ksMap); break; }
+        case 15: {
+            auto sorted = graph.topologicalSort();
+            for (int id : sorted) {
+                cout << id << " ";
+            } break;
+        }
+        case 16: {
+            displayGraph(graph, ksMap, pipeMap);
+            break;
+        }
         case 0:
             fl = 0; break;
         default:

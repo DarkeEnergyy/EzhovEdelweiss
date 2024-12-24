@@ -43,22 +43,22 @@ T1 proverka(T1 min, T1 max) {
     }
 }
 
-template <typename T1>
-T1 proverka(T1 val, T1 val1, T1 val2, T1 val3) {
-    std::cout << "Enter number in range: " << min << "; " << max << std::endl;
-    while (true) {
-        T1 j;
-        std::cin >> j;
-        if (std::cin.fail() || (j != val && j != val1 && j != val2 && j != val3)) {
-            std::cout << "Enter Correct data" << std::endl;
-            std::cin.clear();
-            std::cin.ignore(100, '\n');
-            continue;
-        }
-        std::cerr << j << std::endl;;
-        return j;
-    }
-}
+//template <typename T1>
+//T1 proverka(T1 val, T1 val1, T1 val2, T1 val3) {
+//    std::cout << "Enter number in range: " << min << "; " << max << std::endl;
+//    while (true) {
+//        T1 j;
+//        std::cin >> j;
+//        if (std::cin.fail() || (j != val && j != val1 && j != val2 && j != val3)) {
+//            std::cout << "Enter Correct data" << std::endl;
+//            std::cin.clear();
+//            std::cin.ignore(100, '\n');
+//            continue;
+//        }
+//        std::cerr << j << std::endl;;
+//        return j;
+//    }
+//}
 
 template <typename T>
 int proverka(std::unordered_map<int, T> map) {

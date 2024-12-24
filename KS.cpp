@@ -44,11 +44,11 @@ void KS::setWork(int work) {
 
 ostream& operator << (ostream& ou, const KS& ks) {
     if (ks.getRoom() != -1) {
-        ou << "Name: " << ks.name << endl;
-        ou << "room: " << ks.room << endl;
-        ou << "work: " << ks.work << endl;
-        ou << "kpd: " << ks.kpd << endl;
-        ou << "ID: " << ks.id << endl;
+        ou << /*"Name: " <<*/ ks.name << endl;
+        ou << /*"room: " <<*/ ks.room << endl;
+        ou << /*"work: " <<*/ ks.work << endl;
+        ou << /*"kpd: " <<*/ ks.kpd << endl;
+        ou << /*"ID: " <<*/ ks.id << endl;
     }
     return ou;
 }
@@ -67,18 +67,18 @@ istream& operator >> (istream& in, KS& ks)
     // ks.id = proverka(0, 1000);
     return in;
 }
-fstream& operator << (fstream& out, KS& ks) {
-    if (ks.name != "") {
-        out << ks.name << '\n';
+fstream& operator << (fstream& out, const KS& ks) {
+    if (ks.getName() != "") {
+        out << ks.getName() << '\n';
     }
     else {
         cout << "No KS" << endl;
         return out;
     }
-    out << ks.room << '\n';
-    out << ks.work << '\n';
-    out << ks.kpd << '\n';
-    out << ks.id << '\n';
+    out << ks.getRoom() << '\n';
+    out << ks.getWork() << '\n';
+    out << ks.getKpd() << '\n';
+    out << ks.getID() << '\n';
     return out;
 }
 fstream& operator >> (fstream& f, KS& ks) {
