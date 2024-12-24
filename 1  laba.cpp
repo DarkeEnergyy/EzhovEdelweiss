@@ -262,65 +262,30 @@ void SaveToFile(const unordered_map<int, Pipe>& p, const  unordered_map<int, KS>
     f.close();
 }
 
-//void Connect(vector<KS> net, unordered_map<int, Pipe> p, unordered_map<int, KS> k) {
-//    cout << "Enter id Ks Out then In" << endl;
-//    int idOut = proverka(k);
-//    int idIn = proverka(k);
-//
-//    cout << "Enter diametr of pipe (500, 700, 1000, 1400)" << endl;
-//    int findDiam = proverka(500, 700, 1000, 1400);
-//    bool fl = 0;
-//    for (auto& pipe : p) {
-//        if (pipe.second.getDiam() == findDiam) {
-//            pipe.second.setOutKs(idOut);
-//            pipe.second.setInKs(idIn);
-//            fl = 1;
-//        }
-//    }
-//    if (!(fl)) {
-//        cout << "Pipe not found. Do you want to Create it?" << endl;
-//        if (proverka(0, 1)) {
-//            Pipe pipe = PipeToMap(p);
-//            pipe.setOutKs(idOut);
-//            pipe.setInKs(idIn);
-//        }
-//    }
-//}
 
-//void connectStations(GasTransportGraph& graph, unordered_map<int, Pipe>& pipes, int from, int to, double diameter) {
-//    for (auto& [id, pipe] : pipes) {
-//        if (pipe.getDiam() == diameter && pipe.getisAvailable()) {
-//            pipe.markAsUsed();
-//            graph.addEdge(from, to, id);
-//            cout << "Соединены станции " << from << " и " << to << " с использованием трубы " << id << endl;
-//            return;
-//        }
-//    }
-//
-//    Pipe new_pipe("Новая труба", 100.0, diameter, 0);
-//    pipes[new_pipe.getID()] = new_pipe;
-//    graph.addEdge(from, to, new_pipe.getID());
-//    cout << "Создана и использована новая труба между станциями " << from << " и " << to << endl;
-//}
-
-
-void userConnectStations(GasTransportGraph& graph, unordered_map<int, Pipe>& pipes, unordered_map<int, KS>& stations) {
+void ConnectStations(GasTransportGraph& graph, unordered_map<int, Pipe>& pipes, unordered_map<int, KS>& stations) {
     int from, to;
     double diameter;
 
-    // Вывод доступных станций
+    // Вывод доступных станций 
     cout << "Доступные КС:\n";
     for (const auto& [id, station] : stations) {
         cout << "ID: " << id << ", Название: " << station.getName() << endl;
     }
 
-    // Ввод ID станций
+    // Ввод ID станций 
     cout << "Введите ID станции отправления: ";
-    from = proverka(pipes);
+    from = proverka(stations);
     cout << "Введите ID станции назначения: ";
-    to = proverka(pipes);
+    to = proverka(stations);
 
-    // Вывод доступных диаметров труб
+    // Проверка корректности ввода ID
+    /*if (stations.find(from) == stations.end() || stations.find(to) == stations.end()) {
+        cout << "Ошибка: одна из указанных станций не существует!" << endl;
+        return;
+    }*/
+
+    // Вывод доступных диаметров труб 
     cout << "Введите диаметр трубы для соединения (500, 700, 1000, 1400): ";
     diameter = proverka(500, 1400);
 
@@ -329,9 +294,9 @@ void userConnectStations(GasTransportGraph& graph, unordered_map<int, Pipe>& pip
         return;
     }
 
-    // Поиск доступной трубы
+    // Поиск доступной трубы 
     for (auto& [id, pipe] : pipes) {
-        if (pipe.getDiam() == diameter && pipe.getisAvailable()) {
+        if (pipe.getDiam() == diameter && pipe.getisAvailable() && !pipe.getFix()) {
             pipe.markAsUsed();
             graph.addEdge(from, to, id);
             cout << "Станции " << from << " и " << to << " соединены с использованием трубы ID " << id << endl;
@@ -339,43 +304,70 @@ void userConnectStations(GasTransportGraph& graph, unordered_map<int, Pipe>& pip
         }
     }
 
-    // Если трубы подходящего диаметра нет, создаем новую
-    int Newid;
-    while (true) {
-        Pipe pip = PipeToMap(pipes);
-        if (pip.getDiam() == diameter) { 
-            Newid = pip.getID();
-            break; }
-        cout << "Wrong diametr, try again" << endl;
+    cout << "Создаем новую трубу...\n";
+    Pipe new_pipe = PipeToMap(pipes); // Создаём трубу (предполагается, что PipeToMap добавляет трубу в pipes)
+
+    if (new_pipe.getDiam() == diameter && !new_pipe.getFix()) {
+        int pipe_id = new_pipe.getID(); 
+        pipes[pipe_id].markAsUsed();
+        graph.addEdge(from, to, pipe_id);
+        cout << "Станции " << from << " и " << to << " соединены новой трубой ID " << pipe_id << endl;
     }
-    graph.addEdge(from, to, Newid);
+    else {
+        cout << "Who are you trying to fool?" << endl;
+    }
+}
+void DisconnectStations(GasTransportGraph& graph, unordered_map<int, Pipe>& pipes) {
+    int pipeId;
+    cout << "Введите ID трубы для отключения: ";
+    pipeId = proverka(pipes);
+
+    if (pipes.find(pipeId) == pipes.end()) {
+        cout << "Ошибка: трубы с таким ID не существует!" << endl;
+        return;
+    }
+
+    if (graph.removeEdge(pipeId)) {
+        pipes[pipeId].setisAvailable(true); // Освобождаем трубу
+        cout << "Труба ID " << pipeId << " успешно отключена." << endl;
+    }
+    else {
+        cout << "Ошибка: труба с ID " << pipeId << " не была найдена в соединениях." << endl;
+    }
 }
 
-void displayGraph(const GasTransportGraph& graph, const unordered_map<int, KS>& stations, const unordered_map<int, Pipe>& pipes) {
-    cout << "\nГраф газотранспортной сети:\n";
+void DisplayGraph(const GasTransportGraph& graph, const unordered_map<int, Pipe>& pipes, const unordered_map<int, KS>& stations) {
+    const auto& adjacencyList = graph.getsmejn();
 
-    for (const auto& [stationId, edges] : graph.getsmejn()) {
-        cout << "КС " << stationId << " (" << stations.at(stationId).getName() << ") -> ";
-        for (const auto& [toStation, pipeId] : edges) {
-            const auto& pipe = pipes.at(pipeId);
-            cout << "[КС " << toStation << ", труба " << pipeId << ", " << pipe.getDiam() << "] ";
+    cout << "Текущая структура газотранспортной сети:" << endl;
+
+    for (const auto& [stationId, edges] : adjacencyList) {
+        // Вывод информации о станции
+        if (stations.find(stationId) != stations.end()) {
+            const KS& station = stations.at(stationId);
+            cout << "KS ID: " << stationId;
         }
-        cout << "\n";
-    }
 
-    if (graph.getsmejn().empty()) {
-        cout << "Граф пуст, соединений нет.\n";
-    }
+        // Вывод информации о трубах, подключенных к станции
+        bool fl = 0;
+        for (const auto& edge : edges) {
+            if (pipes.find(edge.pipe_id) != pipes.end()) {
+                const Pipe& pipe = pipes.at(edge.pipe_id);
+                cout << " -> " << edge.to << " with pipe: " << edge.pipe_id << "(d:" << pipe.getDiam() << ")" << endl;
+                fl = 1;
+            }
+        }
+        if (!fl) { cout << "- stock" << endl; }
 
-    cout << endl;
+        cout << endl;
+    }
 }
-
 int Menu()
 {
     cout << "\n1. Add Pipe to map\n2. Add KS to map\n3. Change fixing status\n4. Change number of working\
 KS\n5. Write to file\n6. Read from file\n7. Read data\n8. Choose some pipes or kss(Create vec)\n9. Delete vector\n10. Package edit\n\
-11. Filter Pipes(Make vec)\n12. Filter Kss(Make vec)\n13 Read vector\n14. Connect kss \n15. Topological sort \n16. Diplay graph \n0. Exit" << endl;
-    return proverka(0, 16);
+11. Filter Pipes(Make vec)\n12. Filter Kss(Make vec)\n13 Read vector\n14. Connect kss \n15. Disconnect kss \n16. Topological sort \n17. Diplay graph \n0. Exit" << endl;
+    return proverka(0, 17);
 }
 
 int main()
@@ -455,15 +447,22 @@ int main()
                 break;
             }
         case 14: 
-        { userConnectStations(graph, pipeMap, ksMap); break; }
+        { ConnectStations(graph, pipeMap, ksMap); break; }
         case 15: {
+            DisconnectStations(graph, pipeMap); break;
+        }
+        case 16: {
+            if (graph.hasCycle()) {
+                cout << "Cicle!" << endl;
+                break;
+            }
             auto sorted = graph.topologicalSort();
             for (int id : sorted) {
                 cout << id << " ";
             } break;
         }
-        case 16: {
-            displayGraph(graph, ksMap, pipeMap);
+        case 17: {
+            DisplayGraph(graph, pipeMap, ksMap);
             break;
         }
         case 0:

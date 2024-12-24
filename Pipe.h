@@ -30,7 +30,9 @@ public:
     static int getNextId() { return next_id; }
     /*int getInKs();
     int getOutKs();*/
-    
+    bool getisAvailable();
+    void setisAvailable(bool b);
+
     bool getisAvailable() const;
     void markAsUsed();
 

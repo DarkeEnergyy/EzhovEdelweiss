@@ -17,6 +17,9 @@ Pipe::Pipe(fstream& in)
 }
 Pipe::Pipe(string name, double len, double diam, int fix) : id(getNextId()), name(name), len(len), diam(diam), fix(fix) {}
 
+bool Pipe::getisAvailable() { return isAvailable; }
+void Pipe::setisAvailable(bool b) { isAvailable = b; }
+
 void Pipe::markAsUsed() {
     isAvailable = false;
 }
