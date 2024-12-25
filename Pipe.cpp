@@ -39,6 +39,20 @@ bool Pipe::getisAvailable() const {
 //    outP.push_back(idP);
 //}
 
+
+double Pipe::getCapacity() { return capacity; }
+void Pipe::setCapacity(double cap) {
+    capacity = cap;
+}
+void Pipe::calculateCapacity() {
+    const double C = 1;
+    if (fix == 0) {
+        capacity = C * sqrt(pow(diam, 5) / len);
+    }
+    else { capacity = 0; }
+
+}
+
 string Pipe::getName() const { return name;  }
 double Pipe::getLen() const { return len;  }
 double Pipe::getDiam() const { return diam; }
@@ -68,6 +82,7 @@ istream& operator >> (istream& in, Pipe& pipe)
     pipe.diam = proverka(0.01, 10000.0);
     cout << "Enter fix:" << endl;
     pipe.fix = proverka(0, 1);
+    pipe.calculateCapacity();
    // cout << "Enter id: " << endl;
     //pipe.id = ++Pipe::next_id; //proverka(0, 1000);
     return in;

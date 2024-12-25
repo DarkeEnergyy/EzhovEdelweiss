@@ -14,9 +14,8 @@ private:
     int fix = -1;
     int id = -1;
     bool isAvailable = true;
-    //int inKs;
-    //int outKs;
-    
+    double capacity = 0;
+    double flow = 0;    
 
 public:
     Pipe();
@@ -41,9 +40,10 @@ public:
         next_id = MaxKey(all);
     }
     void setFix(int Fix);
-    /*void setInKs(int idKs);
-    void setOutKs(int outKs)*/;
-
+    
+    double getCapacity();
+    void setCapacity(double cap);
+    void calculateCapacity();
 
     friend ostream& operator << (ostream& ou, const Pipe& pipe);                                            //cout pipe
     friend fstream& operator << (fstream& out, const Pipe& pipe);                                                  //pipe to file for "map to file"

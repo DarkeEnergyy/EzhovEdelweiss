@@ -63,32 +63,27 @@ void changeFix(unordered_map<int, Pipe>& p) {
     }
 }
 
-// Шаблонная функция для проверки наличия объекта в графе
 template<typename T, typename Graph>
 bool isObjectInGraph(const Graph& graph, int id) {
-    // Проверка для Pipe
     if constexpr (std::is_same_v<T, Pipe>) {
         for (const auto& [from, edges] : graph.getsmejn()) {
             for (const auto& edge : edges) {
                 if (edge.pipe_id == id) {
-                    return true; // Труба найдена в графе
+                    return true;
                 }
             }
         }
     }
-    // Проверка для KS (если необходимо)
     else if constexpr (std::is_same_v<T, KS>) {
-        // Реализуйте аналогичную логику для KS, если требуется
-        // Для примера, пусть у нас есть метод для получения всех станций в графе
         for (const auto& [from, edges] : graph.getsmejn()) {
             for (const auto& edge : edges) {
-                if (edge.to == id || edge.from == id) { // Предположим, что KS имеет to в ребре
-                    return true; // Станция найдена в графе
+                if (edge.to == id || edge.from == id) { 
+                    return true; 
                 }
             }
         }
     }
-    return false; // Объект не найден в графе
+    return false; 
 }
 
 template <typename T>
@@ -328,7 +323,7 @@ void ConnectStations(GasTransportGraph& graph, unordered_map<int, Pipe>& pipes, 
     for (auto& [id, pipe] : pipes) {
         if (pipe.getDiam() == diameter && pipe.getisAvailable() && !pipe.getFix()) {
             pipe.markAsUsed();
-            graph.addEdge(from, to, id);
+            graph.addEdge(from, to, id, pipe.getCapacity(), pipe.getLen());
             cout << "Станции " << from << " и " << to << " соединены с использованием трубы ID " << id << endl;
             return;
         }
@@ -340,7 +335,7 @@ void ConnectStations(GasTransportGraph& graph, unordered_map<int, Pipe>& pipes, 
     if (new_pipe.getDiam() == diameter && !new_pipe.getFix()) {
         int pipe_id = new_pipe.getID(); 
         pipes[pipe_id].markAsUsed();
-        graph.addEdge(from, to, pipe_id);
+        graph.addEdge(from, to, pipe_id, new_pipe.getCapacity(), new_pipe.getLen());
         cout << "Станции " << from << " и " << to << " соединены новой трубой ID " << pipe_id << endl;
     }
     else {
@@ -396,8 +391,9 @@ int Menu()
 {
     cout << "\n1. Add Pipe to map\n2. Add KS to map\n3. Change fixing status\n4. Change number of working\
 KS\n5. Write to file\n6. Read from file\n7. Read data\n8. Choose some pipes or kss(Create vec)\n9. Delete vector\n10. Package edit\n\
-11. Filter Pipes(Make vec)\n12. Filter Kss(Make vec)\n13 Read vector\n14. Connect kss \n15. Disconnect kss \n16. Topological sort \n17. Diplay graph \n0. Exit" << endl;
-    return proverka(0, 17);
+11. Filter Pipes(Make vec)\n12. Filter Kss(Make vec)\n13 Read vector\n14. Connect kss \n15. Disconnect kss \n16. Topological sort \n\
+17. Diplay graph \n18. maxFlow\n19. ShortestWay\n0. Exit" << endl;
+    return proverka(0, 19);
 }
 
 int main()
@@ -414,7 +410,7 @@ int main()
     vector<int> vecPipe, vecKS;
     unordered_map<int, Pipe> pipeMap;
     unordered_map<int, KS> ksMap;
-    int choice;
+    //int choice;
     bool fl = 1;
     while (fl) {
         //clog << "Entered number in menu: ";
@@ -493,6 +489,26 @@ int main()
         }
         case 17: {
             DisplayGraph(graph, pipeMap, ksMap);
+            break;
+        }
+        case 18: {
+            int st, f;
+            cout << "Enter strt and finish: ";
+            cin >> st;
+            cin >> f;
+            cout << graph.maxFlow(st,f);
+            break;
+        }
+        case 19: {
+            int st, f;
+            cout << "Enter start and finish: ";
+            cin >> st;
+            cin >> f;
+            vector<int> path = graph.shortestPath(st, f);
+            for (auto a : path) {
+                cout << a << " ";
+            }
+            cout << endl;
             break;
         }
         case 0:
