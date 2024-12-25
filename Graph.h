@@ -2,11 +2,15 @@
 #include <cmath>
 #include <limits>
 #include <unordered_map>
+#include <unordered_set>
+#include <fstream>
 #include <vector>
 #include <queue>
+#include <string>
 #include <iostream>
 #include <algorithm>
 #include "Pipe.h"
+#include "KS.h"
 using namespace std;
 
 struct Edge {
@@ -16,6 +20,9 @@ struct Edge {
     double capacity;
     double flow;
     double weight;
+public:
+    double getCapacity()  { return capacity; }
+    void setCapacity(double new_capacity) { capacity = new_capacity; }
 };
 
 constexpr double INF = numeric_limits<double>::infinity();
@@ -40,6 +47,9 @@ public:
         return smejn;
     }
 
+    //unordered_map<int, vector<Edge>>& getsmejn() {
+    //    return smejn;
+    //}
 
     bool removeEdge(int pipeId) {
         for (auto& [stationId, edges] : smejn) {
@@ -54,6 +64,90 @@ public:
             }
         }
         return false;
+    }
+
+    int countEdges() const {
+        int edge_count = 0;
+        for (const auto& [node, edges] : smejn) {
+            edge_count += edges.size();
+        }
+        return edge_count;
+    }
+
+    void SaveToFile(const string& filename, const unordered_map<int, Pipe>& pipes, const unordered_map<int, KS>& ks) {
+        fstream file(filename, ios::out);
+        if (!file.is_open()) {
+            cerr << "Error: Unable to open file for saving." << endl;
+            return;
+        }
+
+        // Сохраняем количество труб и КС
+        file << pipes.size() << '\n' << ks.size() << '\n';
+
+        // Сохраняем трубы
+        for (const auto& [id, pipe] : pipes) {
+            file << pipe;
+        }
+
+        // Сохраняем КС
+        for (const auto& [id, station] : ks) {
+            file << station;
+        }
+
+        // Сохраняем рёбра графа
+        file << all_nodes.size() << '\n';
+        for (const auto& [from, edges] : smejn) {
+            for (const auto& edge : edges) {
+                file << edge.from << " " << edge.to << " " << edge.pipe_id << " " << edge.capacity << " " << edge.weight << '\n';
+            }
+        }
+
+        file.close();
+        cout << "Graph successfully saved to " << filename << "." << endl;
+    }
+
+    void LoadFromFile(const string& filename, unordered_map<int, Pipe>& pipes, unordered_map<int, KS>& ks) {
+        fstream file(filename, ios::in);
+        if (!file.is_open()) {
+            cerr << "Error: Unable to open file for loading." << endl;
+            return;
+        }
+
+        // Загружаем количество труб и КС
+        int pipeCount, ksCount;
+        file >> pipeCount >> ksCount;
+        file.ignore(); // Пропускаем символ новой строки
+        // Загружаем трубы
+        pipes.clear();
+        for (int i = 0; i < pipeCount; ++i) {
+            Pipe pipe;
+            file >> pipe;
+            pipes[pipe.getID()] = pipe;
+        }
+
+        // Загружаем КС
+        ks.clear();
+        for (int i = 0; i < ksCount; ++i) {
+            KS station;
+            file >> station;
+            ks[station.getID()] = station;
+        }
+
+        // Загружаем рёбра графа
+        smejn.clear();
+        int edgeCount;
+        file >> edgeCount;
+        file.ignore(); // Пропускаем символ новой строки
+
+        for (int i = 0; i < edgeCount; ++i) {
+            int from, to, pipe_id;
+            double capacity, weight;
+            file >> from >> to >> pipe_id >> capacity >> weight;
+            addEdge(from, to, pipe_id, capacity, weight);
+        }
+
+        file.close();
+        cout << "Graph successfully loaded from " << filename << "." << endl;
     }
 
     vector<int> topologicalSort() {
@@ -118,22 +212,26 @@ public:
         return false;
     }
 
-    // Расчет производительности трубы
-    double calculateFlow(double diameter, double length, int fix) {
-        if (fix || length <= 0) return 0; // Если труба в ремонте, производительность = 0
-        return CORRECTION_FACTOR * sqrt(pow(diameter, 5) / length);
-    }
-
-    // Расчет веса ребра
-    double calculateWeight(double length, int fix) {
-        if (fix) return INF; // Если труба в ремонте, вес = бесконечность
-        return length;
-    }
-
     // Расчет максимального потока в сети с использованием алгоритма Эдмондса-Карпа
-    double maxFlow(int source, int sink) {
+    double maxFlow(int source, int sink, unordered_map<int, Pipe> pipes) {
         unordered_map<int, vector<Edge>> residual = smejn;
         double maxFlow = 0;
+
+        // Обновление capacity всех ребер в residual в соответствии с пропускной способностью труб
+        for (auto& [from, edges] : residual) {
+            for (auto& edge : edges) {
+                if (pipes.contains(edge.pipe_id)) {
+                    Pipe& pipe = pipes[edge.pipe_id];
+                    if (pipe.getFix()) {
+                        edge.capacity = 0;
+                    }
+                    else {
+                        pipe.calculateCapacity();
+                        edge.capacity = pipe.getCapacity();
+                    }
+                }
+            }
+        }
 
         while (true) {
             // Поиск пути с положительной пропускной способностью (алгоритм BFS)
@@ -192,10 +290,19 @@ public:
     }
 
     // Расчет кратчайшего пути между двумя станциями с использованием алгоритма Дейкстры
-    vector<int> shortestPath(int start, int end) {
+    vector<int> shortestPath(int start, int end, unordered_map<int, Pipe> pipes) {
         unordered_map<int, double> distances;
         unordered_map<int, int> previous;
         priority_queue<pair<double, int>, vector<pair<double, int>>, greater<pair<double, int>>> pq;
+
+        for (auto& [from, edges] : smejn) {
+            for (auto& edge : edges) {
+                if (pipes.contains(edge.pipe_id)) {
+                    Pipe& pipe = pipes[edge.pipe_id];
+                    edge.weight = pipe.getFix() ? numeric_limits<double>::infinity() : pipe.getLen();
+                }
+            }
+        }
 
         // Инициализация расстояний и предыдущих узлов
         for (int node : all_nodes) {

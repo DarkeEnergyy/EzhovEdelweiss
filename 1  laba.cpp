@@ -110,7 +110,7 @@ void DeletePack(unordered_map<int, T>& p, vector<int>& vec, GasTransportGraph gr
         vec.clear();
     }
 }
-void EditPackPipe(unordered_map<int, Pipe>& p, vector<int>& vec) {
+void EditPackPipe(unordered_map<int, Pipe>& p, vector<int>& vec, GasTransportGraph graph) {
     if (vec.size() == 0) 
     {
         cout << "No pipes for edit(vec0)" << endl;
@@ -120,11 +120,35 @@ void EditPackPipe(unordered_map<int, Pipe>& p, vector<int>& vec) {
     clog << "Fix: ";
     int fix = proverka(0, 1);
     for (auto& a : vec) {
-        if(p.contains(a))
+        if (p.contains(a)) {
             p[a].setFix(fix);
-        else 
-            cout << "Wrong element in vector" << endl;
+            //    // Перерасчет пропускной способности трубы
+            //    double new_capacity;
+            //    if (fix) {
+            //        new_capacity = 0;
+            //    }
+            //    else {  
+            //        p[a].calculateCapacity(); 
+            //        new_capacity = p[a].getCapacity();
+            //    }
+
+            //    for (auto& [from, edges] : graph.getsmejn()) {
+            //        for (auto& edge : edges) {
+            //            if (edge.pipe_id == a) {
+            //                // Обновляем производительность ребра в графе
+            //                edge.setCapacity(new_capacity);
+            //                cout << "Updated capacity for edge (" << from << " -> " << edge.to
+            //                    << ") with pipe ID " << a << ": " << new_capacity << endl;
+            //            }
+            //        }
+            //    }
+            //}
+            //else {
+            //    cout << "Wrong element in vector: Pipe ID " << a << " not found" << endl;
+            //}
+        }
     }
+
 }
 
 template <typename T1, typename T2>
@@ -243,7 +267,7 @@ void Pack(vector<int>& vecP, vector<int>& vecK, unordered_map<int, Pipe>& p, uno
     case 1: {
         switch (proverka(1, 2)) {
         case 1: DeletePack(p, vecP, graph); break;
-        case 2: EditPackPipe(p, vecP); break;
+        case 2: EditPackPipe(p, vecP, graph); break;
         }
         break;
     }
@@ -323,6 +347,7 @@ void ConnectStations(GasTransportGraph& graph, unordered_map<int, Pipe>& pipes, 
     for (auto& [id, pipe] : pipes) {
         if (pipe.getDiam() == diameter && pipe.getisAvailable() && !pipe.getFix()) {
             pipe.markAsUsed();
+            pipe.calculateCapacity();
             graph.addEdge(from, to, id, pipe.getCapacity(), pipe.getLen());
             cout << "Станции " << from << " и " << to << " соединены с использованием трубы ID " << id << endl;
             return;
@@ -335,6 +360,7 @@ void ConnectStations(GasTransportGraph& graph, unordered_map<int, Pipe>& pipes, 
     if (new_pipe.getDiam() == diameter && !new_pipe.getFix()) {
         int pipe_id = new_pipe.getID(); 
         pipes[pipe_id].markAsUsed();
+        new_pipe.calculateCapacity();
         graph.addEdge(from, to, pipe_id, new_pipe.getCapacity(), new_pipe.getLen());
         cout << "Станции " << from << " и " << to << " соединены новой трубой ID " << pipe_id << endl;
     }
@@ -392,8 +418,8 @@ int Menu()
     cout << "\n1. Add Pipe to map\n2. Add KS to map\n3. Change fixing status\n4. Change number of working\
 KS\n5. Write to file\n6. Read from file\n7. Read data\n8. Choose some pipes or kss(Create vec)\n9. Delete vector\n10. Package edit\n\
 11. Filter Pipes(Make vec)\n12. Filter Kss(Make vec)\n13 Read vector\n14. Connect kss \n15. Disconnect kss \n16. Topological sort \n\
-17. Diplay graph \n18. maxFlow\n19. ShortestWay\n0. Exit" << endl;
-    return proverka(0, 19);
+17. Diplay graph \n18. maxFlow\n19. ShortestWay\n20. Import graph \n21. Export graph \n0. Exit" << endl;
+    return proverka(0, 21);
 }
 
 int main()
@@ -496,7 +522,7 @@ int main()
             cout << "Enter strt and finish: ";
             cin >> st;
             cin >> f;
-            cout << graph.maxFlow(st,f);
+            cout << graph.maxFlow(st,f, pipeMap);
             break;
         }
         case 19: {
@@ -504,11 +530,23 @@ int main()
             cout << "Enter start and finish: ";
             cin >> st;
             cin >> f;
-            vector<int> path = graph.shortestPath(st, f);
+            vector<int> path = graph.shortestPath(st, f, pipeMap);
             for (auto a : path) {
                 cout << a << " ";
             }
             cout << endl;
+            break;
+        }
+        case 20: {
+            cout << "Enter File name" << endl;
+            string f = InputString();
+            graph.LoadFromFile(f, pipeMap, ksMap);
+            break;
+        }
+        case 21: {
+            cout << "Enter File name" << endl;
+            string f = InputString();
+            graph.SaveToFile(f, pipeMap, ksMap);
             break;
         }
         case 0:
