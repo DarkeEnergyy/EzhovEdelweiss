@@ -45,9 +45,9 @@ void Pipe::setCapacity(double cap) {
     capacity = cap;
 }
 void Pipe::calculateCapacity() {
-    const double C = 1;
+    const double C = 0.001;
     if (fix == 0) {
-        capacity = C * sqrt(pow(diam, 5) / len);
+        capacity = sqrt(pow(diam*C, 5) / len);
     }
     else { capacity = 0; }
 

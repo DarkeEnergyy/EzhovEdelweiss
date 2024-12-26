@@ -86,8 +86,6 @@ bool isObjectInGraph(const Graph& graph, int id) {
     return false; 
 }
 
-
-
 template <typename T>
 void DeletePack(unordered_map<int, T>& p, vector<int>& vec, GasTransportGraph graph) {
     if (vec.size() == 0) 
@@ -101,8 +99,6 @@ void DeletePack(unordered_map<int, T>& p, vector<int>& vec, GasTransportGraph gr
             if (isObjectInGraph<T>(graph, id)) {
                 cout << "Object " << id << " is in Graph. Do you realy want to delete it(Millions will die)?" << endl;
                 if (proverka(0, 1)) {
-                    graph.removeEdge();
-                    graph.updateGraph(id);
                     p.erase(id);
                 }
             }

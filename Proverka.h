@@ -65,7 +65,7 @@ int proverka(std::unordered_map<int, T> map) {
     while (true) {
         int j;
         std::cin >> j;
-        if (std::cin.fail() || j < 0 || j > MaxKey(map) || !(map.contains(j))) {
+        if (std::cin.fail() || j < 0 || j > MaxKey(map) || !(map.count(j))) {
             std::cout << "Enter Correct data" << std::endl;
             std::cin.clear();
             std::cin.ignore(100, '\n');
@@ -113,7 +113,7 @@ std::vector <int> HandVec(std::unordered_map<int, T>& k) {
         {
             return std::vector<int> (ids.begin(), ids.end());
         }
-        if (k.contains(id))
+        if (k.count(id))
             ids.insert(id);
         else 
             std::cout<< "Wrong id. Try again: ";

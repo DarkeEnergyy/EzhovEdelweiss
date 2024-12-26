@@ -47,13 +47,6 @@ public:
         return smejn;
     }
 
-    void updateGraph(int ks_id) {
-        smejn.erase(ks_id);
-        for (auto& [from, edges] : smejn) {
-            edges.erase(remove_if(edges.begin(), edges.end(), [ks_id](const Edge& edge) {return edge.to == ks_id; }), edges.end());
-        }
-    }
-
     bool removeEdge(int pipeId) {
         for (auto& [stationId, edges] : smejn) {
             auto it = std::remove_if(edges.begin(), edges.end(),

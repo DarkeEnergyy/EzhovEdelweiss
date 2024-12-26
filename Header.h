@@ -8,6 +8,6 @@ template <typename T1, typename T2 >
 using Filtr = bool(*)(T1 obj, T2 param);
 
 template <typename T>
-bool FiltrName(T obj, string name) {
+bool FiltrName(T obj, std::string name) {
 
 }
